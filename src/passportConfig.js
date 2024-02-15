@@ -1,15 +1,15 @@
 const { PrismaClient } = require("@prisma/client");
-const bcrypt = require("bcrypt");
-const { log } = require("console");
-const { userInfo } = require("os");
-const LocalStrategy = require("passport-local").Strategy;
 const prisma = new PrismaClient();
+const bcrypt = require("bcrypt");
+const LocalStrategy = require("passport-local").Strategy;
 
+// module exports first way
+/* 
 module.exports = function (passport) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
-      const user = await prisma.user.findFirst({
-        where: { userName: username },
+      const user = await prisma.user.findUnique({
+        where: { username: username },
       });
       if (user === null) return done(null, false);
       else {
@@ -17,6 +17,33 @@ module.exports = function (passport) {
         if (!passMatch) return done(null, false);
         return done(null, user);
       }
+    })
+  );
+  */
+
+//module exports second way
+
+module.exports = function (passport) {
+  passport.use(
+    new LocalStrategy(async (username, password, done) => {
+      const user = await prisma.user
+        .findUnique({
+          where: { username: username },
+        })
+        .then((user) => {
+          if (!user) return done(null, false, { message: "User not found" });
+
+          //Match password
+          bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (err) throw err;
+            if (isMatch) {
+              return done(null, user);
+            } else {
+              return done(null, false, { message: "Password incorrect" });
+            }
+          });
+        })
+        .catch((err) => console.log(err));
     })
   );
 
@@ -29,7 +56,7 @@ module.exports = function (passport) {
     const user = await prisma.user
       .findFirst({ where: { id: id } })
       .then((user) => {
-        const userInformation = { username: user.userName };
+        const userInformation = { username: user.username };
         done(null, userInformation);
       });
   });
