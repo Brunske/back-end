@@ -25,6 +25,7 @@ const loginPostRoute = async (req, res, next) => {
         res.cookie("token", accessToken, {
           httpOnly: true,
         });
+
         return res.status(200).send({
           message: "Login successful",
         });

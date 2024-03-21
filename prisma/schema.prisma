@@ -10,6 +10,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum LevelType {
+  BASIC
+  REGULAR
+  CHALLENGE
+}
+
+enum LevelDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum levelCategory {
+  BASIC
+  COMPLEX
+}
+
 model User {
   id           Int         @id @default(autoincrement())
   username     String      @unique
@@ -21,21 +38,25 @@ model User {
 }
 
 model Level {
-  id           Int         @id @default(autoincrement())
-  name         String
-  difficulty   String
-  maxScore     Int
-  category     String
-  optionsLimit Int
-  UserLevel    UserLevel[]
+  id            Int             @id @default(autoincrement())
+  name          String
+  type          LevelType
+  category      levelCategory
+  difficulty    LevelDifficulty
+  Score         Int
+  optionsLimit  Int?
+  levelData     Json
+  levelSequence Int
+  UserLevel     UserLevel[]
 }
 
 model UserLevel {
-  id        Int     @id @default(autoincrement())
-  score     Int
-  completed Boolean @default(false)
   userId    Int
   levelId   Int
+  score     Int
+  completed Boolean @default(false)
   User      User    @relation(fields: [userId], references: [id])
   Level     Level   @relation(fields: [levelId], references: [id])
+
+  @@id([userId, levelId])
 }

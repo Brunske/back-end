@@ -28,6 +28,9 @@ const levelSelectorPostRoute = require("./routes/levelSelector/levelSelectorPost
 
 //-----------------------------END OF ROUTE IMPORTS------------------------
 
+const getAllLevels = require("./hooks/levels");
+
+//----------------------------END OF HOOK IMPORTS------------------------
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
@@ -50,7 +53,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 require("./passportConfig")(passport);
-
 //----------------------------END OF MIDDLEWARE------------------------
 
 // function authenticateToken(req, res, next) {
@@ -70,6 +72,10 @@ require("./passportConfig")(passport);
 // }
 
 //----------------------------END OF FUNCTIONS------------------------
+
+app.route("/levels").get(getAllLevels);
+
+//-----------------------------END OF levels------------------------
 
 app.route("/login").get(loginGetRoute).post(loginPostRoute);
 
